@@ -127,3 +127,11 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+
+# pycharm
+.idea
+
+# data model and result
+data
+checkpoint
+/output*
