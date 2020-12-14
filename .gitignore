@@ -132,6 +132,11 @@ dmypy.json
 .idea
 
 # data model and result
-data
+*.txt
+*.csv
+!vocab.txt
+!requirements.txt
+!sample_text.txt
 checkpoint
+result
 /output*

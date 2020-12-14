@@ -203,7 +203,8 @@ class DataProcessor(object):
         """Reads a tab separated value file."""
         with open(input_file, "r", encoding='utf-8') as f:
             lines = f.readlines()
-            random.shuffle(lines)
+            # only shuffle on training
+            # random.shuffle(lines)
             return lines
 
 
@@ -213,17 +214,17 @@ class PancProcessor(DataProcessor):
     def get_train_examples(self, data_dir):
         """See base class."""
         return self._create_examples(
-            self._read_tsv(os.path.join(data_dir, "train.txt")), "train")
+            self._read_tsv(os.path.join(data_dir, "train_128.txt")), "train")
 
     def get_dev_examples(self, data_dir):
         """See base class."""
         return self._create_examples(
-            self._read_tsv(os.path.join(data_dir, "test.txt")), "dev")
+            self._read_tsv(os.path.join(data_dir, "test_128.txt")), "dev")
 
     def get_test_examples(self, data_dir):
         """See base class."""
         return self._create_examples(
-            self._read_tsv(os.path.join(data_dir, "test.txt")), "test")
+            self._read_tsv(os.path.join(data_dir, "test_128.txt")), "test")
 
     def get_labels(self):
         """See base class."""
@@ -232,6 +233,8 @@ class PancProcessor(DataProcessor):
     def _create_examples(self, lines, set_type):
         """Creates examples for the training and dev sets."""
         examples = []
+        if set_type == "train":
+            random.shuffle(lines)
         for (i, line) in enumerate(lines):
             # Only the test set has a header
             line = line.strip().split('\t')
@@ -828,7 +831,7 @@ def main(_):
             drop_remainder=eval_drop_remainder)
 
         result = estimator.evaluate(input_fn=eval_input_fn, steps=eval_steps,
-                                    checkpoint_path=FLAGS.output_dir + 'model.ckpt-1500')
+                                    checkpoint_path=FLAGS.output_dir + 'model.ckpt-4500')
 
         output_eval_file = os.path.join(FLAGS.output_dir, "eval_results.txt")
         with tf.gfile.GFile(output_eval_file, "w") as writer:
