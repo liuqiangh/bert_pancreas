@@ -76,7 +76,7 @@ flags.DEFINE_bool(
     "do_predict", False,
     "Whether to run the model in inference mode on the test set.")
 
-flags.DEFINE_integer("train_batch_size", 8, "Total batch size for training.")
+flags.DEFINE_integer("train_batch_size", 32, "Total batch size for training.")
 
 flags.DEFINE_integer("eval_batch_size", 8, "Total batch size for eval.")
 
@@ -214,17 +214,17 @@ class PancProcessor(DataProcessor):
     def get_train_examples(self, data_dir):
         """See base class."""
         return self._create_examples(
-            self._read_tsv(os.path.join(data_dir, "train_s_512.txt")), "train")
+            self._read_tsv(os.path.join(data_dir, "train_512.txt")), "train")
 
     def get_dev_examples(self, data_dir):
         """See base class."""
         return self._create_examples(
-            self._read_tsv(os.path.join(data_dir, "val_s_512.txt")), "dev")
+            self._read_tsv(os.path.join(data_dir, "val_512.txt")), "dev")
 
     def get_test_examples(self, data_dir):
         """See base class."""
         return self._create_examples(
-            self._read_tsv(os.path.join(data_dir, "test_s_512.txt")), "test")
+            self._read_tsv(os.path.join(data_dir, "test_512.txt")), "test")
 
     def get_labels(self):
         """See base class."""

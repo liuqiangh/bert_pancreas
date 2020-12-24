@@ -76,7 +76,7 @@ flags.DEFINE_bool(
     "do_predict", False,
     "Whether to run the model in inference mode on the test set.")
 
-flags.DEFINE_integer("train_batch_size", 8, "Total batch size for training.")
+flags.DEFINE_integer("train_batch_size", 32, "Total batch size for training.")
 
 flags.DEFINE_integer("eval_batch_size", 8, "Total batch size for eval.")
 
@@ -214,17 +214,17 @@ class PancProcessor(DataProcessor):
     def get_train_examples(self, data_dir):
         """See base class."""
         return self._create_examples(
-            self._read_tsv(os.path.join(data_dir, "train_s_512.txt")), "train")
+            self._read_tsv(os.path.join(data_dir, "train_512.txt")), "train")
 
     def get_dev_examples(self, data_dir):
         """See base class."""
         return self._create_examples(
-            self._read_tsv(os.path.join(data_dir, "val_s_512.txt")), "dev")
+            self._read_tsv(os.path.join(data_dir, "test_512.txt")), "dev")
 
     def get_test_examples(self, data_dir):
         """See base class."""
         return self._create_examples(
-            self._read_tsv(os.path.join(data_dir, "test_s_512.txt")), "test")
+            self._read_tsv(os.path.join(data_dir, "test_512.txt")), "test")
 
     def get_labels(self):
         """See base class."""
@@ -796,11 +796,11 @@ def main(_):
         eval_batch_size=FLAGS.eval_batch_size,
         predict_batch_size=FLAGS.predict_batch_size)
 
-    if FLAGS.do_eval:
-        eval_examples = processor.get_dev_examples(FLAGS.data_dir)
-        eval_file = os.path.join(FLAGS.output_dir, "eval.tf_record")
-        file_based_convert_examples_to_features(
-            eval_examples, label_list, FLAGS.max_seq_length, tokenizer, eval_file)
+    # if FLAGS.do_eval:
+    #     eval_examples = processor.get_dev_examples(FLAGS.data_dir)
+    #     eval_file = os.path.join(FLAGS.output_dir, "eval.tf_record")
+    #     file_based_convert_examples_to_features(
+    #         eval_examples, label_list, FLAGS.max_seq_length, tokenizer, eval_file)
 
     if FLAGS.do_train:
         train_file = os.path.join(FLAGS.output_dir, "train.tf_record")
@@ -816,33 +816,32 @@ def main(_):
             is_training=True,
             drop_remainder=True)
         # only train
-        # estimator.train(input_fn=train_input_fn, max_steps=num_train_steps)
+        estimator.train(input_fn=train_input_fn, max_steps=num_train_steps)
 
         # train and eval
-        eval_drop_remainder = False
-        eval_input_fn = file_based_input_fn_builder(
-            input_file=eval_file,
-            seq_length=FLAGS.max_seq_length,
-            is_training=False,
-            drop_remainder=eval_drop_remainder)
-        train_spec = tf.estimator.TrainSpec(input_fn=train_input_fn,
-                                            max_steps=num_train_steps)
-        exporter = tf.estimator.BestExporter(
-            serving_input_receiver_fn=raw_serving_input_fn,
-            exports_to_keep=2)
-        eval_spec = tf.estimator.EvalSpec(input_fn=eval_input_fn,
-                                          steps=None,  # steps=None, evaluate on the entire eval dataset
-                                          exporters=exporter,
-                                          throttle_secs=3600)
-        tf.estimator.train_and_evaluate(estimator, train_spec, eval_spec)
+        # eval_drop_remainder = False
+        # eval_input_fn = file_based_input_fn_builder(
+        #     input_file=eval_file,
+        #     seq_length=FLAGS.max_seq_length,
+        #     is_training=False,
+        #     drop_remainder=eval_drop_remainder)
+        # train_spec = tf.estimator.TrainSpec(input_fn=train_input_fn,
+        #                                     max_steps=num_train_steps)
+        # exporter = tf.estimator.BestExporter(
+        #     serving_input_receiver_fn=raw_serving_input_fn,
+        #     exports_to_keep=2)
+        # eval_spec = tf.estimator.EvalSpec(input_fn=eval_input_fn,
+        #                                   steps=None,  # steps=None, evaluate on the entire eval dataset
+        #                                   exporters=exporter)
+        # tf.estimator.train_and_evaluate(estimator, train_spec, eval_spec)
 
-    if not FLAGS.do_train and FLAGS.do_eval:
-    # if FLAGS.do_eval:
+    # if not FLAGS.do_train and FLAGS.do_eval:
+    if FLAGS.do_eval:
 
-        # eval_examples = processor.get_dev_examples(FLAGS.data_dir)
-        # eval_file = os.path.join(FLAGS.output_dir, "eval.tf_record")
-        # file_based_convert_examples_to_features(
-        #     eval_examples, label_list, FLAGS.max_seq_length, tokenizer, eval_file)
+        eval_examples = processor.get_dev_examples(FLAGS.data_dir)
+        eval_file = os.path.join(FLAGS.output_dir, "eval.tf_record")
+        file_based_convert_examples_to_features(
+            eval_examples, label_list, FLAGS.max_seq_length, tokenizer, eval_file)
         tf.logging.info("***** Running evaluation *****")
         tf.logging.info("  Num examples = %d", len(eval_examples))
         tf.logging.info("  Batch size = %d", FLAGS.eval_batch_size)

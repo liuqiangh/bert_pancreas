@@ -1,6 +1,9 @@
 # coding=utf-8
 # 将每个txt文件划分成512长度的子序列
-# 句中停用词是否去掉可视模型效果决定
+# 句中停用词是否去掉可视模型效果决定,停用词表可更改
+# --------关于停用词表--------
+# 1、输出的比如train_s_512停用词表指hit_stopwords.txt
+# 2、输出的比如train_s2_512停用词表指punct_stopwords.txt
 
 import os
 
@@ -61,9 +64,10 @@ def get_stop_words(path):
 
 if __name__ == "__main__":
     stop_words_list = get_stop_words('hit_stopwords.txt')
-    input_f = 'neg_test'
+    input_f = 'neg_val'
     max_length = 512
-    output_f = 'test' + '_' + str(max_length)
+    # output_f = 'train' + '_s_' + str(max_length)
+    output_f = 'val' + '_' + str(max_length)
     sample_label = 1 if input_f.split('_')[0] == 'pos' else 0
     if not os.path.isdir(output_f):
         os.makedirs(output_f)

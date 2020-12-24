@@ -15,49 +15,79 @@ import random
 
 def add_label_and_split(label_file, note_file):
     """根据并发症表将文本进行正负样本划分"""
-    label_lines = list(csv.reader(open(label_file, 'r', encoding='gbk')))
-    label_list = []
-    for index, line in enumerate(label_lines):
-        if index == 0:
-            continue
-        label_list.append(line[0])
-    name_files = os.listdir(note_file)
+    # label_lines = list(csv.reader(open(label_file, 'r', encoding='gbk')))
+    # label_list = []
+    # for index, line in enumerate(label_lines):
+    #     if index == 0:
+    #         continue
+    #     label_list.append(line[0])
+    # name_files = os.listdir(note_file)
 
     pos_folder = note_file + '/note_pos'
     neg_folder = note_file + '/note_neg'
-    if not os.path.isdir(pos_folder):
-        os.makedirs(pos_folder)
-    if not os.path.isdir(neg_folder):
-        os.makedirs(neg_folder)
-    for file_name in name_files:
-        file_path = os.path.join(note_file, file_name)
-        if file_name.split('.')[0] in label_list:
-            shutil.move(file_path, pos_folder)
-        else:
-            shutil.move(file_path, neg_folder)
+    # if not os.path.isdir(pos_folder):
+    #     os.makedirs(pos_folder)
+    # if not os.path.isdir(neg_folder):
+    #     os.makedirs(neg_folder)
+    # for file_name in name_files:
+    #     file_path = os.path.join(note_file, file_name)
+    #     if file_name.split('.')[0] in label_list:
+    #         shutil.move(file_path, pos_folder)
+    #     else:
+    #         shutil.move(file_path, neg_folder)
 
     # 划分数据集
     split_data(pos_folder, 'pos')
     split_data(neg_folder, 'neg')
 
 
-def split_data(folder, sample_type, radio=0.7):
+# two types : train and test
+# def split_data(folder, sample_type, radio=0.7):
+#     name_files = os.listdir(folder)
+#     file_num = len(name_files)
+#     index_list = random.sample(range(0, file_num), round(radio * file_num))
+#
+#     # 上级目录
+#     parent_dir = folder.split('/')[0]
+#     train_folder = parent_dir + '/note_split_2/' + sample_type + '_train/'
+#     test_folder = parent_dir + '/note_split_2/' + sample_type + '_test/'
+#     if not os.path.isdir(train_folder):
+#         os.makedirs(train_folder)
+#     if not os.path.isdir(test_folder):
+#         os.makedirs(test_folder)
+#     for index, file_name in enumerate(name_files):
+#         file_path = os.path.join(folder, file_name)
+#         if index in index_list:
+#             shutil.copy(file_path, train_folder)
+#         else:
+#             shutil.copy(file_path, test_folder)
+
+
+# three types : train test validation
+def split_data(folder, sample_type, radio_train=0.6, radio_val=0.2):
     name_files = os.listdir(folder)
     file_num = len(name_files)
-    index_list = random.sample(range(0, file_num), round(radio * file_num))
+    index_list_train_and_val = random.sample(range(0, file_num), round((radio_train + radio_val) * file_num))
+    index_list_val = random.sample(index_list_train_and_val, round(file_num*radio_val))
 
     # 上级目录
     parent_dir = folder.split('/')[0]
-    train_folder = parent_dir + '/note_split/' + sample_type + '_train/'
-    test_folder = parent_dir + '/note_split/' + sample_type + '_test/'
+    train_folder = parent_dir + '/note_split_3/' + sample_type + '_train/'
+    val_folder = parent_dir + '/note_split_3/' + sample_type + '_val/'
+    test_folder = parent_dir + '/note_split_3/' + sample_type + '_test/'
     if not os.path.isdir(train_folder):
         os.makedirs(train_folder)
+    if not os.path.isdir(val_folder):
+        os.makedirs(val_folder)
     if not os.path.isdir(test_folder):
         os.makedirs(test_folder)
     for index, file_name in enumerate(name_files):
         file_path = os.path.join(folder, file_name)
-        if index in index_list:
-            shutil.copy(file_path, train_folder)
+        if index in index_list_train_and_val:
+            if index in index_list_val:
+                shutil.copy(file_path, val_folder)
+            else:
+                shutil.copy(file_path, train_folder)
         else:
             shutil.copy(file_path, test_folder)
 
@@ -92,5 +122,5 @@ if __name__ == "__main__":
     complication_csv = 'research.lqh_t_cancer_complication_sure.csv'
     note_csv = 'research.lqh_t_cancer_note_pre_copy.csv'
     sub_folder = 'note'
-    integrate_pre_note(note_csv, sub_folder)
+    # integrate_pre_note(note_csv, sub_folder)
     add_label_and_split(complication_csv, sub_folder)
